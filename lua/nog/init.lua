@@ -2,6 +2,21 @@ local window = require("nog.window")
 
 local M = {}
 
+local function drawBorderWindow(width, height)
+  local windowWidth = '---'
+  vim.api.nvim_buf_set_lines(M.buf, 0, -1, false, {
+    "---"
+  })
+end
+
+local function drawLine()
+  vim.bo[M.buf].modifiable = true
+
+  drawBorderWindow()
+
+  vim.bo[M.buf].modifiable = false
+end
+
 M.toggle = function()
   -- Check if window already exists, if so, close it
   if M.win and vim.api.nvim_win_is_valid(M.win) then
@@ -22,19 +37,20 @@ M.toggle = function()
     vim.fn.writefile({"# Nog Todo List", "", "- [ ] First Task"}, nog_file)
   end
 
-  -- Load file into buffer
-  vim.bo[M.buf].buftype = ""
-  -- vim.api.nvim_buf_set_name(M.buf, nog_file)
-  vim.cmd("edit " .. nog_file)
+  vim.bo[M.buf].buftype = "nofile"
+  vim.bo[M.buf].modifiable = false
 
   -- Set filetype
   vim.bo[M.buf].filetype = 'markdown'
+
+  drawLine()
 
   -- Keybinds to close
   vim.keymap.set("n", "q", function() M.toggle() end, { buffer = M.buf, silent = true })
   vim.keymap.set("n", "<Esc>", function() M.toggle() end, { buffer = M.buf, silent = true })
 end
 
+-- Setup method to
 M.setup = function(opts)
   vim.notify("Nog plugin loaded!", vim.log.levels.INFO)
 
