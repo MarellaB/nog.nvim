@@ -18,15 +18,22 @@ local function drawLine()
 end
 
 M.toggle = function()
-  -- Check if window already exists, if so, close it
+-- Check if window already exists, if so, close everything
   if M.win and vim.api.nvim_win_is_valid(M.win) then
     vim.api.nvim_win_close(M.win, true)
+    if M.backdrop_win and vim.api.nvim_win_is_valid(M.backdrop_win) then
+      vim.api.nvim_win_close(M.backdrop_win, true)  -- Close backdrop too
+    end
     M.win = nil
     M.buf = nil
+    M.backdrop_win = nil
     return
   end
 
-  -- Create new window
+  -- Create backdrop FIRST
+  M.backdrop_win = window.create_backdrop()
+
+  -- Then create your main window
   M.buf, M.win = window.create_centered_window()
 
   -- Load the nog.md file
