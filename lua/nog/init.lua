@@ -1,5 +1,5 @@
 -- nog.nvim - Blog Manager for Neovim
--- Write and publish tweets and posts to your personal blog
+-- Write and publish blurbs and posts to your personal blog
 
 local M = {}
 
@@ -8,7 +8,7 @@ M.config = {
   api = {
     base_url = nil,
     endpoints = {
-      tweets = "/api/tweets",
+      blurbs = "/api/blurbs", -- Internal: blurbs endpoint (maps to blurbs)
       posts = "/api/posts",
     },
   },
@@ -29,7 +29,7 @@ function M.toggle()
   if ui.is_open() then
     ui.close_all()
   else
-    ui.show_tweet()
+    ui.show_blurb()
   end
 end
 
@@ -74,37 +74,38 @@ function M.show_help()
 Nog - Blog Manager Keybindings
 ==============================
 
-Tweet Composer (default view):
-  <Tab>     - Open menu
-  <C-p>     - Publish tweet
-  <Esc>/q   - Close (auto-saves draft)
-
-Menu:
-  p         - Write/edit post draft
-  t         - Browse published tweets
+Blurb Composer (default view):
+  <C-p>     - Publish blurb
+  p         - Go to post composer
+  t         - Browse published blurbs
   P         - Browse published posts
-  <Esc>     - Back to tweet composer
-  q         - Close entirely
+  q         - Close (auto-saves draft)
 
 Post Composer:
-  r         - Insert reference to tweet/post
+  r         - Insert reference to blurb/post
   <C-p>     - Publish post
-  <Esc>/q   - Back to menu (auto-saves draft)
+  <Esc>     - Back to blurb composer
+  q         - Close (auto-saves draft)
 
 Browse Views:
   j/k       - Navigate up/down
   <Enter>   - View full content
   y         - Copy ID to clipboard
-  <Esc>/q   - Back to menu
+  <Esc>     - Back to blurb composer
+  q         - Close
+
+View Content:
+  <Esc>     - Back to browse list
+  q         - Close
 
 Reference Picker:
-  <Tab>     - Switch between tweets/posts
+  <Tab>     - Switch between blurbs/posts
   j/k       - Navigate
   <Enter>   - Select and insert reference
-  <Esc>/q   - Cancel
+  <Esc>     - Cancel
 
 Reference Syntax:
-  {{tweet:id}} - Reference a tweet
+  {{blurb:id}} - Reference a blurb
   {{post:id}}  - Reference a post
 ]]
 

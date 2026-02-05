@@ -116,43 +116,6 @@ function M.create_single_pane(title, footer_text)
   }
 end
 
--- Create a content-only window (no status bar, for menu overlay)
-function M.create_menu_window(title)
-  local dims = get_dimensions()
-  -- Menu is smaller
-  local menu_width = math.min(50, dims.width)
-  local menu_height = 10
-  local menu_row = math.floor((vim.o.lines - menu_height) / 2)
-  local menu_col = math.floor((vim.o.columns - menu_width) / 2)
-
-  local buf = vim.api.nvim_create_buf(false, true)
-  vim.bo[buf].bufhidden = "wipe"
-
-  local win_opts = {
-    relative = "editor",
-    width = menu_width,
-    height = menu_height,
-    row = menu_row,
-    col = menu_col,
-    style = "minimal",
-    title = " " .. title .. " ",
-    title_pos = "center",
-    border = "rounded",
-    zindex = 52, -- Above other nog windows
-  }
-
-  local win = vim.api.nvim_open_win(buf, true, win_opts)
-
-  -- Use Normal background like snacks.nvim scratch
-  vim.wo[win].winhighlight = "NormalFloat:Normal"
-  vim.wo[win].winblend = 0
-
-  return {
-    buf = buf,
-    win = win,
-  }
-end
-
 -- Create a browse list window
 function M.create_browse_window(title, footer_text)
   return M.create_single_pane(title, footer_text)

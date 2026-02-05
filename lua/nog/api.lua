@@ -6,7 +6,7 @@ local M = {}
 M.config = {
   base_url = nil,
   endpoints = {
-    tweets = "/api/tweets",
+    blurbs = "/api/blurbs",
     posts = "/api/posts",
   },
   auth_token = nil,
@@ -17,9 +17,9 @@ function M.is_configured()
   return M.config.base_url ~= nil and M.config.base_url ~= ""
 end
 
--- Publish a tweet to the API
+-- Publish a blurb to the API
 -- Returns: { success = bool, remote_id = string?, error = string? }
-function M.publish_tweet(tweet)
+function M.publish_blurb(blurb)
   if not M.is_configured() then
     return {
       success = false,
@@ -28,8 +28,8 @@ function M.publish_tweet(tweet)
     }
   end
 
-  -- TODO: HTTP POST to tweets endpoint
-  -- local url = M.config.base_url .. M.config.endpoints.tweets
+  -- TODO: HTTP POST to blurbs endpoint
+  -- local url = M.config.base_url .. M.config.endpoints.blurbs
   -- For now, return a stub response
   return {
     success = false,
@@ -59,21 +59,21 @@ function M.publish_post(post)
   }
 end
 
--- Fetch published tweets from API (for syncing)
--- Returns: { success = bool, tweets = table?, error = string? }
-function M.fetch_tweets()
+-- Fetch published blurbs from API (for syncing)
+-- Returns: { success = bool, blurbs = table?, error = string? }
+function M.fetch_blurbs()
   if not M.is_configured() then
     return {
       success = false,
-      tweets = nil,
+      blurbs = nil,
       error = "API not configured. Set base_url in setup().",
     }
   end
 
-  -- TODO: HTTP GET from tweets endpoint
+  -- TODO: HTTP GET from blurbs endpoint
   return {
     success = false,
-    tweets = nil,
+    blurbs = nil,
     error = "API integration not yet implemented.",
   }
 end

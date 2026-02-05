@@ -4,9 +4,9 @@ A Neovim-based blog manager for writing and publishing content to your personal 
 
 ## Features
 
-- **Tweet Composer** - Quick, short-form posts (primary interface)
+- **Blurb Composer** - Quick, short-form posts (primary interface)
 - **Post Composer** - Full blog posts with Markdown support
-- **Reference System** - Link tweets and posts using `{{tweet:id}}` or `{{post:id}}`
+- **Reference System** - Link blurbs and posts using `{{blurb:id}}` or `{{post:id}}`
 - **Draft Persistence** - Drafts auto-save and persist across sessions
 - **Browse History** - View and copy IDs from published content
 - **Keyboard-Driven** - Modal interface similar to lazygit
@@ -45,7 +45,7 @@ require("nog").setup({
   api = {
     base_url = "https://yourblog.com",
     endpoints = {
-      tweets = "/api/tweets",
+      blurbs = "/api/blurbs",
       posts = "/api/posts",
     },
   },
@@ -75,31 +75,24 @@ require("nog").setup({
 
 ### Keybindings
 
-#### Tweet Composer (default view)
+#### Blurb Composer (default view)
 
 | Key | Action |
 |-----|--------|
-| `<Tab>` | Open menu |
-| `<C-p>` | Publish tweet |
-| `<Esc>` / `q` | Close (auto-saves draft) |
-
-#### Menu
-
-| Key | Action |
-|-----|--------|
-| `p` | Write/edit post draft |
-| `t` | Browse published tweets |
+| `<C-p>` | Publish blurb |
+| `p` | Go to post composer |
+| `t` | Browse published blurbs |
 | `P` | Browse published posts |
-| `<Esc>` | Back to tweet composer |
-| `q` | Close entirely |
+| `q` | Close (auto-saves draft) |
 
 #### Post Composer
 
 | Key | Action |
 |-----|--------|
-| `r` | Insert reference to tweet/post |
+| `r` | Insert reference to blurb/post |
 | `<C-p>` | Publish post |
-| `<Esc>` / `q` | Back to menu (auto-saves draft) |
+| `<Esc>` | Back to blurb composer |
+| `q` | Close (auto-saves draft) |
 
 #### Browse Views
 
@@ -108,23 +101,31 @@ require("nog").setup({
 | `j` / `k` | Navigate up/down |
 | `<Enter>` | View full content |
 | `y` | Copy ID to clipboard |
-| `<Esc>` / `q` | Back to menu |
+| `<Esc>` | Back to blurb composer |
+| `q` | Close |
+
+#### View Content
+
+| Key | Action |
+|-----|--------|
+| `<Esc>` | Back to browse list |
+| `q` | Close |
 
 #### Reference Picker
 
 | Key | Action |
 |-----|--------|
-| `<Tab>` | Switch between tweets/posts |
+| `<Tab>` | Switch between blurbs/posts |
 | `j` / `k` | Navigate |
 | `<Enter>` | Select and insert reference |
-| `<Esc>` / `q` | Cancel |
+| `<Esc>` | Cancel |
 
 ### Reference Syntax
 
-In post content, you can reference other tweets or posts:
+In post content, you can reference other blurbs or posts:
 
 ```markdown
-Check out my earlier thought: {{tweet:123}}
+Check out my earlier thought: {{blurb:123}}
 
 As I mentioned in {{post:456}}, this is important.
 ```
@@ -135,9 +136,9 @@ Local data is stored in `~/.local/share/nvim/nog/` by default:
 
 ```
 ~/.local/share/nvim/nog/
-├── tweet_draft.md      # Current tweet draft
+├── blurb_draft.md      # Current blurb draft
 ├── post_draft.md       # Current post draft
-├── tweets.json         # Published tweets history
+├── blurbs.json         # Published blurbs history
 └── posts.json          # Published posts history
 ```
 
@@ -148,13 +149,13 @@ The API module is currently stubbed for future implementation. When configured w
 Expected API contract:
 
 ```
-POST /api/tweets
+POST /api/blurbs
 Content-Type: application/json
 { "content": "markdown string" }
 
 POST /api/posts
 Content-Type: application/json
-{ "content": "markdown string", "references": ["tweet:123", "post:456"] }
+{ "content": "markdown string", "references": ["blurb:123", "post:456"] }
 ```
 
 ## Why Nog?

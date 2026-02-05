@@ -11,23 +11,23 @@ local M = {}
 
 -- UI State
 M.state = {
-  view = nil, -- "tweet", "menu", "post", "browse_tweets", "browse_posts", "ref_picker", "view_content"
+  view = nil, -- "blurb", "post", "browse_blurbs", "browse_posts", "ref_picker", "view_content"
   backdrop_win = nil,
   backdrop_buf = nil,
   -- Current view windows/buffers
   main_buf = nil,
   main_win = nil,
-  -- Overlay windows (menu, picker)
+  -- Overlay windows (picker)
   overlay_buf = nil,
   overlay_win = nil,
   -- Browse state
   browse_items = {},
   browse_cursor = 1,
-  browse_type = nil, -- "tweets" or "posts"
+  browse_type = nil, -- "blurbs" or "posts"
   -- Ref picker state
   picker_items = {},
   picker_cursor = 1,
-  picker_type = "tweets", -- "tweets" or "posts"
+  picker_type = "blurbs", -- "blurbs" or "posts" (internal: keeping as blurbs for API compatibility)
   -- Post composer state (for returning from ref picker)
   post_buf_saved = nil,
   post_win_saved = nil,
@@ -37,13 +37,12 @@ M.state = {
 
 -- Status bar text for different views
 local STATUS = {
-  tweet = "[Ctrl+p] Publish   [Tab] Menu   [q] Close",
-  menu = "[p] Post  [t] Tweets  [P] Posts  [q] Close",
-  post = "[r] Insert Ref  [Ctrl+p] Publish  [q] Close",
-  browse_tweets = "[Enter] View  [y] Copy ID  [j/k] Navigate  [q] Close",
-  browse_posts = "[Enter] View  [y] Copy ID  [j/k] Navigate  [q] Close",
+  blurb = "[Ctrl+p] Publish   [p] Post   [t] Blurbs   [P] Posts   [q] Close",
+  post = "[r] Insert Ref   [Ctrl+p] Publish   [Esc] Back   [q] Close",
+  browse_blurbs = "[Enter] View   [y] Copy ID   [j/k] Navigate   [Esc] Back   [q] Close",
+  browse_posts = "[Enter] View   [y] Copy ID   [j/k] Navigate   [Esc] Back   [q] Close",
   ref_picker = "[Enter] Select  [Tab] Switch Type  [j/k] Navigate  [Esc] Cancel  [q] Close",
-  view_content = "[q] Close",
+  view_content = "[Esc] Back   [q] Close",
 }
 
 -- Helper to get buffer content as string
@@ -67,10 +66,10 @@ end
 
 -- Close all UI windows
 function M.close_all()
-  -- Save current draft if in tweet or post view
-  if M.state.view == "tweet" and M.state.main_buf then
+  -- Save current draft if in blurb or post view
+  if M.state.view == "blurb" and M.state.main_buf then
     local content = get_buffer_content(M.state.main_buf)
-    storage.save_tweet_draft(content)
+    storage.save_blurb_draft(content)
   elseif M.state.view == "post" and M.state.main_buf then
     local content = get_buffer_content(M.state.main_buf)
     storage.save_post_draft(content)
@@ -97,8 +96,8 @@ function M.is_open()
   return M.state.backdrop_win ~= nil and vim.api.nvim_win_is_valid(M.state.backdrop_win)
 end
 
--- Show tweet composer (default view)
-function M.show_tweet()
+-- Show blurb composer (default view)
+function M.show_blurb()
   -- Close any overlay
   window.close_win(M.state.overlay_win)
   M.state.overlay_win = nil
@@ -110,15 +109,15 @@ function M.show_tweet()
   end
 
   -- Close existing main windows if different view
-  if M.state.view ~= "tweet" then
+  if M.state.view ~= "blurb" then
     window.close_win(M.state.main_win)
 
-    local pane = window.create_single_pane("Blurb", STATUS.tweet)
+    local pane = window.create_single_pane("Blurb", STATUS.blurb)
     M.state.main_buf = pane.main_buf
     M.state.main_win = pane.main_win
   end
 
-  M.state.view = "tweet"
+  M.state.view = "blurb"
 
   -- Setup buffer for editing
   vim.bo[M.state.main_buf].filetype = "markdown"
@@ -126,61 +125,21 @@ function M.show_tweet()
   vim.bo[M.state.main_buf].modifiable = true
 
   -- Load draft
-  local draft = storage.load_tweet_draft()
+  local draft = storage.load_blurb_draft()
   if draft and draft.content then
     set_buffer_content(M.state.main_buf, draft.content)
   end
 
   -- Setup keymaps
-  keymaps.setup_tweet_keymaps(M.state.main_buf, {
+  keymaps.setup_blurb_keymaps(M.state.main_buf, {
     publish = function()
-      M.publish_tweet()
+      M.publish_blurb()
     end,
-    menu = function()
-      M.show_menu()
-    end,
-    close = function()
-      M.close_all()
-    end,
-  })
-end
-
--- Show menu overlay
-function M.show_menu()
-  -- Save tweet draft before showing menu
-  if M.state.view == "tweet" and M.state.main_buf then
-    local content = get_buffer_content(M.state.main_buf)
-    storage.save_tweet_draft(content)
-  end
-
-  local menu = window.create_menu_window("Menu")
-  M.state.overlay_buf = menu.buf
-  M.state.overlay_win = menu.win
-  M.state.view = "menu"
-
-  -- Render menu content
-  local menu_lines = {
-    "",
-    "   [p] Write Post (current draft)",
-    "",
-    "   [t] Browse Tweets",
-    "   [P] Browse Posts",
-    "",
-    "   [q] Close",
-    "",
-  }
-  vim.bo[M.state.overlay_buf].modifiable = true
-  vim.api.nvim_buf_set_lines(M.state.overlay_buf, 0, -1, false, menu_lines)
-  vim.bo[M.state.overlay_buf].modifiable = false
-  vim.bo[M.state.overlay_buf].buftype = "nofile"
-
-  -- Setup keymaps
-  keymaps.setup_menu_keymaps(M.state.overlay_buf, {
     post = function()
       M.show_post()
     end,
-    browse_tweets = function()
-      M.show_browse("tweets")
+    browse_blurbs = function()
+      M.show_browse("blurbs")
     end,
     browse_posts = function()
       M.show_browse("posts")
@@ -191,8 +150,15 @@ function M.show_menu()
   })
 end
 
+
 -- Show post composer
 function M.show_post()
+  -- Save blurb draft if coming from blurb view
+  if M.state.view == "blurb" and M.state.main_buf then
+    local content = get_buffer_content(M.state.main_buf)
+    storage.save_blurb_draft(content)
+  end
+
   -- Close overlay
   window.close_win(M.state.overlay_win)
   M.state.overlay_win = nil
@@ -225,13 +191,16 @@ function M.show_post()
     insert_ref = function()
       M.show_ref_picker()
     end,
+    back = function()
+      M.show_blurb()
+    end,
     close = function()
       M.close_all()
     end,
   })
 end
 
--- Show browse view (tweets or posts)
+-- Show browse view (blurbs or posts)
 function M.show_browse(browse_type)
   -- Close overlay
   window.close_win(M.state.overlay_win)
@@ -241,8 +210,8 @@ function M.show_browse(browse_type)
   -- Close existing main windows
   window.close_win(M.state.main_win)
 
-  local title = browse_type == "tweets" and "Tweets" or "Posts"
-  local footer = browse_type == "tweets" and STATUS.browse_tweets or STATUS.browse_posts
+  local title = browse_type == "blurbs" and "Blurbs" or "Posts"
+  local footer = browse_type == "blurbs" and STATUS.browse_blurbs or STATUS.browse_posts
 
   local pane = window.create_browse_window(title, footer)
   M.state.main_buf = pane.main_buf
@@ -251,8 +220,8 @@ function M.show_browse(browse_type)
   M.state.browse_type = browse_type
 
   -- Load items
-  if browse_type == "tweets" then
-    M.state.browse_items = storage.load_tweets_history()
+  if browse_type == "blurbs" then
+    M.state.browse_items = storage.load_blurbs_history()
   else
     M.state.browse_items = storage.load_posts_history()
   end
@@ -278,6 +247,9 @@ function M.show_browse(browse_type)
     end,
     copy_id = function()
       M.copy_browse_id()
+    end,
+    back = function()
+      M.show_blurb()
     end,
     close = function()
       M.close_all()
@@ -333,7 +305,7 @@ function M.view_browse_item()
   -- Close existing windows
   window.close_win(M.state.main_win)
 
-  local title = M.state.browse_type == "tweets" and "Tweet #" .. (item.id or "?") or "Post #" .. (item.id or "?")
+  local title = M.state.browse_type == "blurbs" and "Blurb #" .. (item.id or "?") or "Post #" .. (item.id or "?")
   local pane = window.create_single_pane(title, STATUS.view_content)
   M.state.main_buf = pane.main_buf
   M.state.main_win = pane.main_win
@@ -348,10 +320,12 @@ function M.view_browse_item()
   vim.bo[M.state.main_buf].filetype = "markdown"
 
   -- Setup keymaps
-  local close_fn = function()
+  vim.keymap.set("n", "q", function()
     M.close_all()
-  end
-  vim.keymap.set("n", "q", close_fn, { buffer = M.state.main_buf, noremap = true, silent = true })
+  end, { buffer = M.state.main_buf, noremap = true, silent = true })
+  vim.keymap.set("n", "<Esc>", function()
+    M.show_browse(M.state.browse_type)
+  end, { buffer = M.state.main_buf, noremap = true, silent = true })
 end
 
 -- Copy ID of current browse item to clipboard
@@ -382,7 +356,7 @@ function M.show_ref_picker()
   M.state.overlay_buf = picker.buf
   M.state.overlay_win = picker.win
 
-  M.state.picker_type = "tweets"
+  M.state.picker_type = "blurbs"
   M.state.picker_cursor = 1
 
   -- Load items
@@ -417,8 +391,8 @@ end
 
 -- Reload picker items based on current type
 function M.reload_picker_items()
-  if M.state.picker_type == "tweets" then
-    M.state.picker_items = storage.load_tweets_history()
+  if M.state.picker_type == "blurbs" then
+    M.state.picker_items = storage.load_blurbs_history()
   else
     M.state.picker_items = storage.load_posts_history()
   end
@@ -464,7 +438,7 @@ end
 
 -- Switch picker type
 function M.picker_switch_type()
-  M.state.picker_type = M.state.picker_type == "tweets" and "posts" or "tweets"
+  M.state.picker_type = M.state.picker_type == "blurbs" and "posts" or "blurbs"
   M.reload_picker_items()
   M.render_picker()
 end
@@ -478,7 +452,7 @@ function M.select_reference()
     return
   end
 
-  local ref_type = M.state.picker_type == "tweets" and "tweet" or "post"
+  local ref_type = M.state.picker_type == "blurbs" and "blurb" or "post"
 
   -- Close picker
   window.close_win(M.state.overlay_win)
@@ -516,27 +490,27 @@ function M.close_ref_picker()
   M.state.post_win_saved = nil
 end
 
--- Publish tweet
-function M.publish_tweet()
+-- Publish blurb
+function M.publish_blurb()
   local content = get_buffer_content(M.state.main_buf)
   if not content or content == "" then
-    vim.notify("Cannot publish empty tweet", vim.log.levels.WARN)
+    vim.notify("Cannot publish empty blurb", vim.log.levels.WARN)
     return
   end
 
-  local result = api.publish_tweet({ content = content })
+  local result = api.publish_blurb({ content = content })
 
   if result.success then
     -- Add to history
-    storage.add_published_tweet({
+    storage.add_published_blurb({
       id = result.remote_id,
       content = content,
       published_at = os.time(),
     })
     -- Clear draft
-    storage.clear_tweet_draft()
+    storage.clear_blurb_draft()
     set_buffer_content(M.state.main_buf, "")
-    vim.notify("Tweet published!", vim.log.levels.INFO)
+    vim.notify("Blurb published!", vim.log.levels.INFO)
   else
     vim.notify("Publish failed: " .. (result.error or "Unknown error"), vim.log.levels.ERROR)
   end

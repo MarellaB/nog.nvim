@@ -16,16 +16,16 @@ local function ensure_storage_dir()
 end
 
 -- File paths
-local function tweet_draft_path()
-  return M.config.storage_path .. "/tweet_draft.md"
+local function blurb_draft_path()
+  return M.config.storage_path .. "/blurb_draft.md"
 end
 
 local function post_draft_path()
   return M.config.storage_path .. "/post_draft.md"
 end
 
-local function tweets_history_path()
-  return M.config.storage_path .. "/tweets.json"
+local function blurbs_history_path()
+  return M.config.storage_path .. "/blurbs.json"
 end
 
 local function posts_history_path()
@@ -71,24 +71,24 @@ local function json_decode(str)
   return nil
 end
 
--- Tweet draft operations
-function M.load_tweet_draft()
-  local content = read_file(tweet_draft_path())
+-- Blurb draft operations
+function M.load_blurb_draft()
+  local content = read_file(blurb_draft_path())
   if content then
     return {
       content = content,
-      updated_at = vim.fn.getftime(tweet_draft_path()),
+      updated_at = vim.fn.getftime(blurb_draft_path()),
     }
   end
   return nil
 end
 
-function M.save_tweet_draft(content)
-  return write_file(tweet_draft_path(), content or "")
+function M.save_blurb_draft(content)
+  return write_file(blurb_draft_path(), content or "")
 end
 
-function M.clear_tweet_draft()
-  local path = tweet_draft_path()
+function M.clear_blurb_draft()
+  local path = blurb_draft_path()
   if vim.fn.filereadable(path) == 1 then
     vim.fn.delete(path)
   end
@@ -117,21 +117,21 @@ function M.clear_post_draft()
   end
 end
 
--- Published tweets history
-function M.load_tweets_history()
-  local content = read_file(tweets_history_path())
+-- Published blurbs history
+function M.load_blurbs_history()
+  local content = read_file(blurbs_history_path())
   local data = json_decode(content)
   return data or {}
 end
 
-function M.save_tweets_history(tweets)
-  return write_file(tweets_history_path(), json_encode(tweets))
+function M.save_blurbs_history(blurbs)
+  return write_file(blurbs_history_path(), json_encode(blurbs))
 end
 
-function M.add_published_tweet(tweet)
-  local history = M.load_tweets_history()
-  table.insert(history, 1, tweet) -- Insert at beginning (newest first)
-  return M.save_tweets_history(history)
+function M.add_published_blurb(blurb)
+  local history = M.load_blurbs_history()
+  table.insert(history, 1, blurb) -- Insert at beginning (newest first)
+  return M.save_blurbs_history(history)
 end
 
 -- Published posts history

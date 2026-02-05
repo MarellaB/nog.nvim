@@ -1,17 +1,17 @@
 -- nog.nvim references module
--- Handles parsing and insertion of tweet/post references
+-- Handles parsing and insertion of blurb/post references
 
 local M = {}
 
--- Reference pattern: {{tweet:id}} or {{post:id}}
-local TWEET_PATTERN = "{{tweet:([^}]+)}}"
+-- Reference pattern: {{blurb:id}} or {{post:id}}
+local BLURB_PATTERN = "{{blurb:([^}]+)}}"
 local POST_PATTERN = "{{post:([^}]+)}}"
 
 -- Parse all references from content
--- Returns: { tweets = { id1, id2, ... }, posts = { id1, id2, ... } }
+-- Returns: { blurbs = { id1, id2, ... }, posts = { id1, id2, ... } }
 function M.parse_references(content)
   local refs = {
-    tweets = {},
+    blurbs = {},
     posts = {},
   }
 
@@ -19,9 +19,9 @@ function M.parse_references(content)
     return refs
   end
 
-  -- Find all tweet references
-  for id in string.gmatch(content, TWEET_PATTERN) do
-    table.insert(refs.tweets, id)
+  -- Find all blurb references
+  for id in string.gmatch(content, BLURB_PATTERN) do
+    table.insert(refs.blurbs, id)
   end
 
   -- Find all post references
@@ -32,9 +32,9 @@ function M.parse_references(content)
   return refs
 end
 
--- Create a tweet reference string
-function M.create_tweet_ref(id)
-  return "{{tweet:" .. id .. "}}"
+-- Create a blurb reference string
+function M.create_blurb_ref(id)
+  return "{{blurb:" .. id .. "}}"
 end
 
 -- Create a post reference string
@@ -43,11 +43,11 @@ function M.create_post_ref(id)
 end
 
 -- Get all references as a flat list for storage
--- Returns: { "tweet:123", "post:456", ... }
+-- Returns: { "blurb:123", "post:456", ... }
 function M.flatten_references(refs)
   local flat = {}
-  for _, id in ipairs(refs.tweets or {}) do
-    table.insert(flat, "tweet:" .. id)
+  for _, id in ipairs(refs.blurbs or {}) do
+    table.insert(flat, "blurb:" .. id)
   end
   for _, id in ipairs(refs.posts or {}) do
     table.insert(flat, "post:" .. id)
@@ -58,8 +58,8 @@ end
 -- Insert a reference at the current cursor position in a buffer
 function M.insert_reference_at_cursor(bufnr, ref_type, id)
   local ref_str
-  if ref_type == "tweet" then
-    ref_str = M.create_tweet_ref(id)
+  if ref_type == "blurb" then
+    ref_str = M.create_blurb_ref(id)
   elseif ref_type == "post" then
     ref_str = M.create_post_ref(id)
   else

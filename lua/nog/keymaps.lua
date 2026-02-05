@@ -5,16 +5,11 @@ local M = {}
 
 -- Default keymap definitions (can be overridden via setup)
 M.defaults = {
-  -- Tweet composer keymaps
-  tweet = {
+  -- Blurb composer keymaps
+  blurb = {
     publish = "<C-p>",
-    menu = "<Tab>",
-    close = "q",
-  },
-  -- Menu view keymaps
-  menu = {
     post = "p",
-    browse_tweets = "t",
+    browse_blurbs = "t",
     browse_posts = "P",
     close = "q",
   },
@@ -22,6 +17,7 @@ M.defaults = {
   post = {
     publish = "<C-p>",
     insert_ref = "r",
+    back = "<Esc>",
     close = "q",
   },
   -- Browse views keymaps
@@ -30,6 +26,7 @@ M.defaults = {
     nav_up = "k",
     view = "<CR>",
     copy_id = "y",
+    back = "<Esc>",
     close = "q",
   },
   -- Reference picker keymaps
@@ -63,28 +60,19 @@ local function set_keys(bufnr, mode, keys, action, opts)
   end
 end
 
--- Setup keymaps for tweet composer view
-function M.setup_tweet_keymaps(bufnr, callbacks)
-  -- Publish tweet
-  buf_keymap(bufnr, "n", M.keymaps.tweet.publish, callbacks.publish)
-  buf_keymap(bufnr, "i", M.keymaps.tweet.publish, callbacks.publish)
+-- Setup keymaps for blurb composer view
+function M.setup_blurb_keymaps(bufnr, callbacks)
+  -- Publish blurb
+  buf_keymap(bufnr, "n", M.keymaps.blurb.publish, callbacks.publish)
+  buf_keymap(bufnr, "i", M.keymaps.blurb.publish, callbacks.publish)
 
-  -- Open menu
-  buf_keymap(bufnr, "n", M.keymaps.tweet.menu, callbacks.menu)
-
-  -- Close plugin
-  set_keys(bufnr, "n", M.keymaps.tweet.close, callbacks.close)
-end
-
--- Setup keymaps for menu view
-function M.setup_menu_keymaps(bufnr, callbacks)
-  -- Navigation options
-  buf_keymap(bufnr, "n", M.keymaps.menu.post, callbacks.post)
-  buf_keymap(bufnr, "n", M.keymaps.menu.browse_tweets, callbacks.browse_tweets)
-  buf_keymap(bufnr, "n", M.keymaps.menu.browse_posts, callbacks.browse_posts)
+  -- Direct navigation to other panes
+  buf_keymap(bufnr, "n", M.keymaps.blurb.post, callbacks.post)
+  buf_keymap(bufnr, "n", M.keymaps.blurb.browse_blurbs, callbacks.browse_blurbs)
+  buf_keymap(bufnr, "n", M.keymaps.blurb.browse_posts, callbacks.browse_posts)
 
   -- Close plugin
-  buf_keymap(bufnr, "n", M.keymaps.menu.close, callbacks.close)
+  set_keys(bufnr, "n", M.keymaps.blurb.close, callbacks.close)
 end
 
 -- Setup keymaps for post composer view
@@ -96,11 +84,14 @@ function M.setup_post_keymaps(bufnr, callbacks)
   -- Insert reference
   buf_keymap(bufnr, "n", M.keymaps.post.insert_ref, callbacks.insert_ref)
 
+  -- Back to blurb composer
+  buf_keymap(bufnr, "n", M.keymaps.post.back, callbacks.back)
+
   -- Close plugin
   set_keys(bufnr, "n", M.keymaps.post.close, callbacks.close)
 end
 
--- Setup keymaps for browse views (tweets/posts)
+-- Setup keymaps for browse views (blurbs/posts)
 function M.setup_browse_keymaps(bufnr, callbacks)
   -- Navigation
   buf_keymap(bufnr, "n", M.keymaps.browse.nav_down, callbacks.nav_down)
@@ -111,6 +102,9 @@ function M.setup_browse_keymaps(bufnr, callbacks)
 
   -- Copy ID to clipboard
   buf_keymap(bufnr, "n", M.keymaps.browse.copy_id, callbacks.copy_id)
+
+  -- Back to blurb composer
+  buf_keymap(bufnr, "n", M.keymaps.browse.back, callbacks.back)
 
   -- Close plugin
   set_keys(bufnr, "n", M.keymaps.browse.close, callbacks.close)
@@ -128,7 +122,7 @@ function M.setup_ref_picker_keymaps(bufnr, callbacks)
   buf_keymap(bufnr, "n", M.keymaps.ref_picker.nav_down, callbacks.nav_down)
   buf_keymap(bufnr, "n", M.keymaps.ref_picker.nav_up, callbacks.nav_up)
 
-  -- Switch between tweets/posts
+  -- Switch between blurbs/posts
   buf_keymap(bufnr, "n", M.keymaps.ref_picker.switch_type, callbacks.switch_type)
 
   -- Close plugin
