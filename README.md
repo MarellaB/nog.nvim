@@ -48,6 +48,7 @@ require("nog").setup({
       blurbs = "/api/blurbs",
       posts = "/api/posts",
     },
+    auth_token = "mYs3cr3tCo0lT0ken" -- Or something better
   },
 
   -- Storage location (default: ~/.local/share/nvim/nog/)
@@ -72,9 +73,12 @@ require("nog").setup({
 
 - `:NogToggle` - Open/close the blog manager
 
-### Reference Syntax
+### Post & Blurb Syntax
 
-In post content, you can reference other blurbs or posts:
+Posts and Blurbs are just assumed to be Markdown syntax, then if you want you
+can support linked posts with the below format which in Nog will render with
+the post name and it's associated ID. Render it however you'd like on your
+end.
 
 ```markdown
 Check out my earlier thought: {{blurb:123}}
@@ -113,7 +117,7 @@ Content-Type: application/json
 
 ## Why Nog?
 
-It was an easy name forming from **N**e**o**vim and Bl**og**, and I came up with
+It was an easy name forming from Neovim and Blog, and I came up with
 the idea around Christmas time so it fit.
 
 ## License
