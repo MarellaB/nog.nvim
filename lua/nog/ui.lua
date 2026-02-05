@@ -11,7 +11,7 @@ local M = {}
 
 -- UI State
 M.state = {
-  view = nil, -- "blurb", "post", "browse_blurbs", "browse_posts", "ref_picker", "view_content"
+  view = nil, -- "blurb", "post", "browse_blurbs", "ref_picker", "view_content"
   backdrop_win = nil,
   backdrop_buf = nil,
   -- Current view windows/buffers
@@ -37,10 +37,9 @@ M.state = {
 
 -- Status bar text for different views
 local STATUS = {
-  blurb = "[Ctrl+p] Publish   [p] Post   [t] Blurbs   [P] Posts   [q] Close",
-  post = "[r] Insert Ref   [Ctrl+p] Publish   [Esc] Back   [q] Close",
+  blurb = "[P] Publish   [p] Post   [b] Blurbs   [q] Close",
+  post = "[r] Insert Ref   [P] Publish   [Esc] Back   [q] Close",
   browse_blurbs = "[Enter] View   [y] Copy ID   [j/k] Navigate   [Esc] Back   [q] Close",
-  browse_posts = "[Enter] View   [y] Copy ID   [j/k] Navigate   [Esc] Back   [q] Close",
   ref_picker = "[Enter] Select  [Tab] Switch Type  [j/k] Navigate  [Esc] Cancel  [q] Close",
   view_content = "[Esc] Back   [q] Close",
 }
@@ -141,9 +140,6 @@ function M.show_blurb()
     browse_blurbs = function()
       M.show_browse("blurbs")
     end,
-    browse_posts = function()
-      M.show_browse("posts")
-    end,
     close = function()
       M.close_all()
     end,
@@ -200,7 +196,7 @@ function M.show_post()
   })
 end
 
--- Show browse view (blurbs or posts)
+-- Show browse view (blurbs only)
 function M.show_browse(browse_type)
   -- Close overlay
   window.close_win(M.state.overlay_win)
@@ -210,21 +206,14 @@ function M.show_browse(browse_type)
   -- Close existing main windows
   window.close_win(M.state.main_win)
 
-  local title = browse_type == "blurbs" and "Blurbs" or "Posts"
-  local footer = browse_type == "blurbs" and STATUS.browse_blurbs or STATUS.browse_posts
-
-  local pane = window.create_browse_window(title, footer)
+  local pane = window.create_browse_window("Blurbs", STATUS.browse_blurbs)
   M.state.main_buf = pane.main_buf
   M.state.main_win = pane.main_win
-  M.state.view = "browse_" .. browse_type
-  M.state.browse_type = browse_type
+  M.state.view = "browse_blurbs"
+  M.state.browse_type = "blurbs"
 
-  -- Load items
-  if browse_type == "blurbs" then
-    M.state.browse_items = storage.load_blurbs_history()
-  else
-    M.state.browse_items = storage.load_posts_history()
-  end
+  -- Load blurbs
+  M.state.browse_items = storage.load_blurbs_history()
   M.state.browse_cursor = 1
 
   -- Render browse list

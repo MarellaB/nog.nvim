@@ -7,15 +7,14 @@ local M = {}
 M.defaults = {
   -- Blurb composer keymaps
   blurb = {
-    publish = "<C-p>",
+    publish = "P",
     post = "p",
-    browse_blurbs = "t",
-    browse_posts = "P",
+    browse_blurbs = "b",
     close = "q",
   },
   -- Post composer keymaps
   post = {
-    publish = "<C-p>",
+    publish = "P",
     insert_ref = "r",
     back = "<Esc>",
     close = "q",
@@ -64,12 +63,10 @@ end
 function M.setup_blurb_keymaps(bufnr, callbacks)
   -- Publish blurb
   buf_keymap(bufnr, "n", M.keymaps.blurb.publish, callbacks.publish)
-  buf_keymap(bufnr, "i", M.keymaps.blurb.publish, callbacks.publish)
 
   -- Direct navigation to other panes
   buf_keymap(bufnr, "n", M.keymaps.blurb.post, callbacks.post)
   buf_keymap(bufnr, "n", M.keymaps.blurb.browse_blurbs, callbacks.browse_blurbs)
-  buf_keymap(bufnr, "n", M.keymaps.blurb.browse_posts, callbacks.browse_posts)
 
   -- Close plugin
   set_keys(bufnr, "n", M.keymaps.blurb.close, callbacks.close)
@@ -79,7 +76,6 @@ end
 function M.setup_post_keymaps(bufnr, callbacks)
   -- Publish post
   buf_keymap(bufnr, "n", M.keymaps.post.publish, callbacks.publish)
-  buf_keymap(bufnr, "i", M.keymaps.post.publish, callbacks.publish)
 
   -- Insert reference
   buf_keymap(bufnr, "n", M.keymaps.post.insert_ref, callbacks.insert_ref)
