@@ -8,14 +8,11 @@ M.config = {
   api = {
     base_url = nil,
     endpoints = {
-      blurbs = "/api/blurbs", -- Internal: blurbs endpoint (maps to blurbs)
+      blurbs = "/api/blurbs",
       posts = "/api/posts",
     },
   },
   storage_path = vim.fn.stdpath("data") .. "/nog",
-  keymaps = {
-    toggle = nil, -- Optional global keymap (set to e.g. "<leader>b")
-  },
   ui = {
     width = 0.5,
     height = 0.3,
@@ -54,13 +51,6 @@ function M.setup(opts)
   vim.api.nvim_create_user_command("NogToggle", function()
     M.toggle()
   end, { desc = "Toggle Nog blog manager" })
-
-  -- Set up global keymap if configured
-  if M.config.keymaps.toggle then
-    vim.keymap.set("n", M.config.keymaps.toggle, function()
-      M.toggle()
-    end, { silent = true, desc = "Toggle Nog" })
-  end
 end
 
 return M

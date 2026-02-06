@@ -13,35 +13,64 @@ blog, entirely from within Neovim.
 
 ## Installation
 
-Using [lazy.nvim](https://github.com/folke/lazy.nvim):
+### Using [lazy.nvim](https://github.com/folke/lazy.nvim) (Recommended)
 
 ```lua
 {
   "marellab/nog.nvim",
-  config = function()
-    require("nog").setup({
-      -- Optional configuration
-    })
-  end,
+  keys = {
+    { "<leader>ng", "<cmd>NogToggle<cr>", desc = "Toggle Nog blog manager" },
+  },
+  opts = {
+    api = {
+      base_url = "https://yourblog.com",
+      endpoints = {
+        blurbs = "/api/blurbs",
+        posts = "/api/posts",
+      },
+    },
+  },
 }
 ```
 
-Using [packer.nvim](https://github.com/wbthomason/packer.nvim):
+### Using [packer.nvim](https://github.com/wbthomason/packer.nvim)
 
 ```lua
 use {
   "marellab/nog.nvim",
   config = function()
-    require("nog").setup()
+    require("nog").setup({
+      -- Configuration
+    })
+
+    -- Set up keybindings
+    vim.keymap.set("n", "<leader>ng", "<cmd>NogToggle<cr>", { desc = "Toggle Nog blog manager" })
   end
 }
+```
+
+### Using [vim-plug](https://github.com/junegunn/vim-plug)
+
+```vim
+Plug 'marellab/nog.nvim'
+```
+
+Then in your `init.lua` or `init.vim`:
+
+```lua
+require("nog").setup({
+  -- Configuration
+})
+
+-- Set up keybindings
+vim.keymap.set("n", "<leader>ng", "<cmd>NogToggle<cr>", { desc = "Toggle Nog blog manager" })
 ```
 
 ## Configuration
 
 ```lua
 require("nog").setup({
-  -- API configuration (for future HTTP integration)
+  -- API configuration
   api = {
     base_url = "https://yourblog.com",
     endpoints = {
@@ -53,11 +82,6 @@ require("nog").setup({
 
   -- Storage location (default: ~/.local/share/nvim/nog/)
   storage_path = vim.fn.stdpath("data") .. "/nog",
-
-  -- Optional global keymap
-  keymaps = {
-    toggle = "<leader>b",
-  },
 
   -- UI dimensions (as percentage of screen)
   ui = {
